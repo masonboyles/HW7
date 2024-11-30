@@ -1,6 +1,6 @@
 ---
 title: "Hw 7"
-author: "Student Name"
+author: "Mason Boyles"
 date: "1/5/2024"
 output: 
   html_document:
@@ -12,36 +12,67 @@ Recall that in class we showed that for randomized response differential privacy
 
 I want you to generalize this result for a potentially biased coin.  That is, for a differentially private mechanism that uses a coin landing heads up with probability $0 \leq \theta \leq 1$, find an estimate $\hat{P}$ for the proportion of incriminating observations.  This expression should be in terms of $\theta$ and $\hat{\pi}$.  
 
-**Student Answer**
+$\hat{\pi} = (1-\theta)*\theta+\theta(\hat{p})$
+
+$\hat{\pi} = \theta-\theta^2+\hat{p}\theta)$
+
+$\hat{\pi} - \theta + \theta^2 = \hat{p}\theta$
+
+$\hat{p} = \frac{\hat{\pi}}{\theta} - 1 +\theta$
 
 #
 Next, show that this expression reduces to our result from class in the special case where $\theta = \frac{1}{2}$.
 
-**Student Answer**
+When $\theta = \frac{1}{2}$ we have:
+
+$\hat{p} = \frac{\hat{\pi}}{1/2} - 1 + 1/2 = 2\hat{\pi}-1+1/2 = 2\hat{\pi}-1/2$
 
 
 #
 Part of having an explainable model is being able to implement the algorithm from scratch.  Let's try and do this with `KNN`.  Write a function entitled `chebychev` that takes in two vectors and outputs the Chebychev or $L^\infty$ distance between said vectors.  I will test your function on two vectors below.  Then, write a `nearest_neighbors` function that finds the user specified $k$ nearest neighbors according to a user specified distance function (in this case $L^\infty$) to a user specified data point observation.  
 
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 #student input
 #chebychev function
+chebychev <- function(x, y) {
+  distance <- max(abs(x - y))
+  return(distance)
+}
 #nearest_neighbors function
+nearest_neighbors <- function(x, obs, k, dist_func){
+  dist = apply(x, 1, dist_func, obs) #apply along the rows
+  distances = sort(dist)[1: k]
+  neighbor_list = which(dist %in% sort(dist)[1:k])
+  return(list(neighbor_list, distances))
+}
+euclid <- function(x, y) {
+  distance = sqrt(sum((x-y)^2))
+  return(distance)
+}
+taxi <- function(x,y){
+  distance = sum(abs(x-y))
+  return(distance)
+}
 
 
 x<- c(3,4,5)
 y<-c(7,10,1)
-cheby(x,y)
+chebychev(x,y)
 
 ```
 
 #
 Finally create a `knn_classifier` function that takes the nearest neighbors specified from the above functions and assigns a class label based on the mode class label within these nearest neighbors.  I will then test your functions by finding the five nearest neighbors to the very last observation in the `iris` dataset according to the `chebychev` distance and classifying this function accordingly.  
 
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 library(class)
 df <- data(iris) 
 #student input
+knn_classifier = function(x,y){
+  groups = table(x[,y])
+  pred = groups[groups == max(groups)]
+  return(pred)
+}
 
 
 #data less last observation
@@ -61,17 +92,17 @@ obs[,'Species']
 # 
 Interpret this output.  Did you get the correct classification?  Also, if you specified $K=5$, why do you have $7$ observations included in the output dataframe?
 
-**Student Answer**
+The reason there are 7 observations is because there are ties. Chebychev distance simply takes the minimum of each of the distances of features and for each of those 7 nearest neighbors, there is a feature that has the exact same value as our observation. I believe we did get the correct classification, I confirmed by using taxi and euclidean distance as our distance function and ended up with the same results.
 
 
 #
 Earlier in this unit we learned about Google's DeepMind assisting in the management of acute kidney injury.  Assistance in the health care sector is always welcome, particularly if it benefits the well-being of the patient.  Even so, algorithmic assistance necessitates the acquisition and retention of sensitive health care data.  With this in mind, who should be privy to this sensitive information?  In particular, is data transfer allowed if the company managing the software is subsumed?  Should the data be made available to insurance companies who could use this to better calibrate their actuarial risk but also deny care?  Stake a position and defend it using principles discussed from the class.  
 
-**Student Answer**
+From the perspective of a utilitarian, I would argue that it is justified to give the sensitive information to any and everyone who could engineer benefit to the masses. This is because in the end, if you tally up the consequences will be negative for the people who have their health care data collected, and it will be positive for all of the people who may be helped by the use of that data (presumably a higher number of people in the long run as each persons data can help people for years to come). In addition, the pain that affects the people getting data collected on them will be a lower order one (not life or death) whereas the pleasure for the field of health care have the potential to actually save lives.
 
 #
 I have described our responsibility to proper interpretation as an *obligation* or *duty*.  How might a Kantian Deontologist defend such a claim?  
 
-**Student Answer**
+A Kantian Deontologist would be against the sharing of the data. This is because Kant emphasized how it is unethical to use someone as a mere means to an end. In this case, using peoples data would be using them as a mere means to an end rather than an end in and of themselves, which would violate his second formulation of the second imparative.
 
 
