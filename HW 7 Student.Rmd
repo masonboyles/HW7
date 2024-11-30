@@ -2,7 +2,8 @@
 title: "Hw 7"
 author: "Mason Boyles"
 date: "1/5/2024"
-output: 
+output:
+  pdf_document: default
   html_document:
     number_sections: true
 ---
